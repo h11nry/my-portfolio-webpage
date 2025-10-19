@@ -134,25 +134,104 @@ for (let i = 0; i < formInputs.length; i++) {
   });
 }
 
+// Create status message display function
+function showStatusMessage(message, type = 'info', duration = 3000) {
+    // Remove existing status messages
+    const existingStatus = document.querySelector('.form-status-message');
+    if (existingStatus) {
+        existingStatus.remove();
+    }
+    
+    // Create new status message
+    const statusDiv = document.createElement('div');
+    statusDiv.className = `form-status-message form-status-${type}`;
+    statusDiv.textContent = message;
+    
+    // Add styles
+    statusDiv.style.cssText = `
+        margin: 10px 0;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: opacity 0.3s ease;
+    `;
+    
+    // Set colors based on type
+    if (type === 'success') {
+        statusDiv.style.backgroundColor = '#d4edda';
+        statusDiv.style.color = '#155724';
+        statusDiv.style.border = '1px solid #c3e6cb';
+    } else if (type === 'error') {
+        statusDiv.style.backgroundColor = '#f8d7da';
+        statusDiv.style.color = '#721c24';
+        statusDiv.style.border = '1px solid #f5c6cb';
+    } else {
+        statusDiv.style.backgroundColor = '#d1ecf1';
+        statusDiv.style.color = '#0c5460';
+        statusDiv.style.border = '1px solid #bee5eb';
+    }
+    
+    // Insert after the form
+    form.parentNode.insertBefore(statusDiv, form.nextSibling);
+    
+    // Auto-hide after duration
+    if (duration > 0) {
+        setTimeout(() => {
+            if (statusDiv.parentNode) {
+                statusDiv.style.opacity = '0';
+                setTimeout(() => {
+                    if (statusDiv.parentNode) {
+                        statusDiv.remove();
+                    }
+                }, 300);
+            }
+        }, duration);
+    }
+}
+
 // Initialize form handling
 window.addEventListener('load', function() {
-    // Check if we're running locally or on a server
-    const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // Check if form exists
+    if (!form) {
+        console.log('Contact form not found');
+        return;
+    }
     
-    if (isLocal) {
-        console.log('Running locally - using mailto fallback');
-        // Use mailto for local testing
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const buttonText = formBtn.querySelector('span');
-            const originalText = buttonText.textContent;
-            buttonText.textContent = 'Opening email...';
-            formBtn.setAttribute('disabled', '');
-            
-            const name = document.querySelector('input[name="user_name"]').value;
-            const email = document.querySelector('input[name="user_email"]').value;
-            const message = document.querySelector('textarea[name="message"]').value;
+    // Check if we're running locally or on a server
+    const isLocal = window.location.protocol === 'file:' || 
+                   window.location.hostname === 'localhost' || 
+                   window.location.hostname === '127.0.0.1';
+    
+    console.log('Contact form initialized. Environment:', isLocal ? 'Local' : 'Server');
+    console.log('EmailJS available:', typeof emailjs !== 'undefined');
+    
+    // Main form submit handler
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const buttonText = formBtn.querySelector('span');
+        const originalText = buttonText.textContent;
+        const formData = new FormData(form);
+        
+        // Get form values
+        const name = formData.get('user_name');
+        const email = formData.get('user_email');
+        const message = formData.get('message');
+        
+        // Validate form data
+        if (!name || !email || !message) {
+            showStatusMessage('Please fill in all required fields.', 'error');
+            return;
+        }
+        
+        // Update button state
+        buttonText.textContent = 'Sending...';
+        formBtn.setAttribute('disabled', '');
+        
+        if (isLocal) {
+            console.log('Using mailto for local environment');
+            showStatusMessage('Opening your email client...', 'info', 2000);
             
             const subject = encodeURIComponent(`Portfolio Contact: Message from ${name}`);
             const body = encodeURIComponent(`Hi Henry,
@@ -168,76 +247,70 @@ ${message}
 ---
 Sent from your portfolio contact form`);
             
-            // Small delay to show the "Opening email..." message
-            setTimeout(function() {
+            setTimeout(() => {
                 window.location.href = `mailto:h3nryhu@gmail.com?subject=${subject}&body=${body}`;
                 
-                // Reset button after a short delay
-                setTimeout(function() {
+                // Reset form after delay
+                setTimeout(() => {
                     buttonText.textContent = originalText;
                     formBtn.setAttribute('disabled', '');
                     form.reset();
+                    showStatusMessage('Email client opened! Please send the email to complete your message.', 'success');
                 }, 1000);
             }, 500);
-        });
-    } else if (typeof emailjs !== 'undefined') {
-        console.log('Running on server - using EmailJS');
-        emailjs.init("0bFk33zdsm-Iyw5xr");
-        
-        // Handle form submission with EmailJS
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
             
-            const buttonText = formBtn.querySelector('span');
-            const originalText = buttonText.textContent;
-            buttonText.textContent = 'Sending...';
-            formBtn.setAttribute('disabled', '');
+        } else if (typeof emailjs !== 'undefined') {
+            console.log('Using EmailJS for server environment');
             
-            emailjs.sendForm('Message_Gmail', 'template_ja228jq', this)
+            // Initialize EmailJS
+            emailjs.init("0bFk33zdsm-Iyw5xr");
+            
+            // Send email using EmailJS
+            emailjs.sendForm('Message_Gmail', 'template_ja228jq', form)
                 .then(function(response) {
-                    console.log('SUCCESS!', response.status, response.text);
-                    alert('Message sent successfully!');
+                    console.log('EmailJS SUCCESS!', response.status, response.text);
+                    showStatusMessage('Message sent successfully! I\'ll get back to you soon.', 'success');
                     form.reset();
-                    buttonText.textContent = originalText;
-                    formBtn.setAttribute('disabled', '');
-                }, function(error) {
-                    console.log('FAILED...', error);
+                })
+                .catch(function(error) {
+                    console.log('EmailJS FAILED...', error);
                     
-                    // Reset button
+                    // Show error and offer mailto fallback
+                    const errorMessage = error.text || error.message || 'Unknown error occurred';
+                    showStatusMessage(`Email service failed: ${errorMessage}`, 'error', 0);
+                    
+                    // Add mailto fallback option
+                    setTimeout(() => {
+                        if (confirm('Email service failed. Would you like to open your email client instead?')) {
+                            const subject = encodeURIComponent(`Portfolio Contact: Message from ${name}`);
+                            const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
+                            
+                            window.location.href = `mailto:h3nryhu@gmail.com?subject=${subject}&body=${body}`;
+                        }
+                    }, 1000);
+                })
+                .finally(() => {
                     buttonText.textContent = originalText;
                     if (form.checkValidity()) {
                         formBtn.removeAttribute('disabled');
                     }
-                    
-                    // Fallback to mailto even on server if EmailJS fails
-                    if (confirm('Email service failed. Would you like to open your email client instead?')) {
-                        const name = document.querySelector('input[name="user_name"]').value;
-                        const email = document.querySelector('input[name="user_email"]').value;
-                        const message = document.querySelector('textarea[name="message"]').value;
-                        
-                        const subject = encodeURIComponent(`Portfolio Contact: Message from ${name}`);
-                        const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-                        
-                        window.location.href = `mailto:h3nryhu@gmail.com?subject=${subject}&body=${body}`;
-                    }
                 });
-        });
-    } else {
-        console.log('EmailJS not available - using mailto fallback');
-        // Fallback to mailto if EmailJS is not loaded
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const name = document.querySelector('input[name="user_name"]').value;
-            const email = document.querySelector('input[name="user_email"]').value;
-            const message = document.querySelector('textarea[name="message"]').value;
+                
+        } else {
+            console.log('EmailJS not available - using mailto fallback');
+            showStatusMessage('Opening your email client...', 'info', 2000);
             
             const subject = encodeURIComponent(`Portfolio Contact: Message from ${name}`);
             const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
             
-            window.location.href = `mailto:h3nryhu@gmail.com?subject=${subject}&body=${body}`;
-        });
-    }
+            setTimeout(() => {
+                window.location.href = `mailto:h3nryhu@gmail.com?subject=${subject}&body=${body}`;
+                buttonText.textContent = originalText;
+                formBtn.setAttribute('disabled', '');
+                form.reset();
+            }, 500);
+        }
+    });
 });
 
 
