@@ -266,7 +266,7 @@ Sent from your portfolio contact form`);
             emailjs.init("0bFk33zdsm-Iyw5xr");
             
             // Send email using EmailJS
-            emailjs.sendForm('Message_Gmail', 'template_ja228jq', form)
+            emailjs.sendForm('Message_Gmail', 'template_52s0wsh', form)
                 .then(function(response) {
                     console.log('EmailJS SUCCESS!', response.status, response.text);
                     showStatusMessage('Message sent successfully! I\'ll get back to you soon.', 'success');
