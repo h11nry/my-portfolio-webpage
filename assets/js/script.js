@@ -259,14 +259,30 @@ Sent from your portfolio contact form`);
                 }, 1000);
             }, 500);
             
-        } else if (typeof emailjs !== 'undefined') {
-            console.log('Using EmailJS for server environment');
+    } else if (typeof emailjs !== 'undefined') {
+      console.log('Using EmailJS for server environment');
             
-            // Initialize EmailJS
-            emailjs.init("0bFk33zdsm-Iyw5xr");
+      // Read EmailJS config from data-attributes on the form
+      const publicKey = (form.dataset.emailjsPublicKey || '').trim();
+      const serviceId = (form.dataset.emailjsService || '').trim();
+      const templateId = (form.dataset.emailjsTemplate || '').trim();
+
+      // Log for debugging
+      console.log('EmailJS config ->', { publicKey, serviceId, templateId });
+
+      // Validate IDs
+      if (!publicKey || !serviceId || !templateId) {
+        showStatusMessage('Email service is not configured properly. Please set Public Key, Service ID and Template ID.', 'error', 0);
+        buttonText.textContent = originalText;
+        if (form.checkValidity()) formBtn.removeAttribute('disabled');
+        return;
+      }
+
+      // Initialize EmailJS
+      emailjs.init(publicKey);
             
-            // Send email using EmailJS
-            emailjs.sendForm('Message_Gmail', 'template_52s0wsh', form)
+      // Send email using EmailJS
+      emailjs.sendForm(serviceId, templateId, form)
                 .then(function(response) {
                     console.log('EmailJS SUCCESS!', response.status, response.text);
                     showStatusMessage('Message sent successfully! I\'ll get back to you soon.', 'success');
@@ -276,8 +292,12 @@ Sent from your portfolio contact form`);
                     console.log('EmailJS FAILED...', error);
                     
                     // Show error and offer mailto fallback
-                    const errorMessage = error.text || error.message || 'Unknown error occurred';
-                    showStatusMessage(`Email service failed: ${errorMessage}`, 'error', 0);
+          const errorMessage = (error && (error.text || error.message)) || 'Unknown error occurred';
+          let friendly = `Email service failed: ${errorMessage}`;
+          if (/template id/i.test(errorMessage)) {
+            friendly += `\nPlease verify Template ID exactly matches in EmailJS (case-sensitive): ${templateId}`;
+          }
+          showStatusMessage(friendly, 'error', 0);
                     
                     // Add mailto fallback option
                     setTimeout(() => {
