@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[TITLE] - Henry's Blog</title>
+    <title>Photograph Gallery - Henry's Blog</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -100,23 +100,8 @@
             border-radius: 50%;
         }
         
-        .featured-image {
-            width: 100%;
-            max-width: 100%;
-            height: 600px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            transition: transform 0.3s ease;
-        }
-        
-        .featured-image:hover {
-            transform: scale(1.02);
-        }
-        
         .content {
-            font-size: 1.05em;
+            font-size: 1.1em;
             line-height: 1.7;
         }
         
@@ -125,67 +110,35 @@
             text-align: left;
         }
         
-        .content h3 {
+        .content h1, .content h2, .content h3 {
             color: #ffffff;
-            font-size: 1.9em;
             margin: 35px 0 18px;
-            border-bottom: 3px solid #ffdb70;
-            padding-bottom: 8px;
             font-family: 'Space Grotesk', 'Arial Black', sans-serif;
             font-weight: 600;
-            letter-spacing: -0.5px;
         }
         
-        .content h4 {
+        .content h1 { font-size: 2.4em; border-bottom: 3px solid #ffdb70; padding-bottom: 8px; }
+        .content h2 { font-size: 2.0em; border-bottom: 2px solid #ffdb70; padding-bottom: 6px; }
+        .content h3 { font-size: 1.6em; border-bottom: 1px solid #ffdb70; padding-bottom: 4px; }
+        
+        .content strong {
+            color: #ffffff;
+            font-weight: bold;
+        }
+        
+        .content em {
             color: #ffdb70;
-            font-size: 1.25em;
-            margin: 25px 0 12px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
+            font-style: italic;
         }
-        
-        .content ul {
-            margin: 15px 0 15px 25px;
-        }
-        
-        .content li {
-            margin-bottom: 8px;
-        }
-        
+
+        /* All blog formatting styles */
         .special-box {
             background: #383838;
             border: 1px solid #555;
             border-radius: 8px;
             padding: 20px;
             margin: 25px 0;
-        }
-        
-        .character-box {
-            background: linear-gradient(135deg, #383838, #444);
             border-left: 4px solid #ffdb70;
-        }
-        
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 25px 0;
-        }
-        
-        .feature-item {
-            background: #383838;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #555;
-        }
-        
-        .movie-highlight {
-            background: linear-gradient(135deg, #444, #333);
-            border-left: 4px solid #ff6b6b;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 0 8px 8px 0;
         }
         
         .quote-box {
@@ -210,6 +163,14 @@
             font-size: 0.85em;
         }
         
+        .movie-highlight {
+            background: linear-gradient(135deg, #444, #333);
+            border-left: 4px solid #ff6b6b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
         .conclusion {
             background: linear-gradient(135deg, #444, #556);
             border: 2px solid #ffdb70;
@@ -223,19 +184,9 @@
             color: #ffdb70;
             margin-bottom: 15px;
         }
-        
-        strong {
-            color: #ffffff;
-            font-weight: bold;
-        }
-        
-        em {
-            color: #ffdb70;
-            font-style: italic;
-        }
-        
+
         /* Image styles */
-        .inline-image {
+        .inline-image, .featured-image {
             width: 100%;
             max-width: 100%;
             height: auto;
@@ -245,8 +196,13 @@
             transition: transform 0.3s ease;
         }
         
-        .inline-image:hover {
-            transform: scale(1.05);
+        .featured-image {
+            height: 450px;
+            object-fit: cover;
+        }
+        
+        .inline-image:hover, .featured-image:hover {
+            transform: scale(1.02);
         }
         
         .image-caption {
@@ -334,20 +290,16 @@
         </header>
 
         <article>
-            <!-- REPLACE: Article title -->
             <h1 class="article-title">Photograph Gallery</h1>
             
-            <!-- REPLACE: Meta information -->
             <div class="blog-meta">
                 <span class="blog-category">Photography</span>
                 <span class="dot"></span>
-                <time datetime="2025-10-22">October 22, 2025</time>
+                <time datetime="2025-10-22">Oct 22, 2025</time>
             </div>
 
-            <!-- REPLACE: Featured image -->
-            <img src="../images/photograph-gallery/photograph10.jpg" alt="Featured Photograph" class="featured-image">
-
             <div class="content">
+
                 <!-- START CONTENT: Replace everything between these comments with your article content -->
                 
                 <p>
@@ -410,11 +362,11 @@
                 <div class="conclusion">
                     <h4>🎭 [Conclusion Title]</h4>
                     <p>
-                        [Your conclusion content. This creates a special conclusion section.]
-                    </p>
+                        Great</p>
                 </div>
 
                 <!-- END CONTENT -->
+            
             </div>
         </article>
     </div>
